@@ -11,7 +11,16 @@
 
 <br>
 
-<img src="assets/qdm_overview.png" alt="QDM Overview" width="800"/>
+## Geometric Setup
+
+<img width="860" alt="SO-3" src="https://github.com/user-attachments/assets/8ab26069-61a0-4593-ad83-6df03b46ec12" />
+
+**Figure 1:** The ambient space X contains all 3D molecular conformations. SO(3) acts by rotating conformations, collapsing each orbit to a single point [x] = π(x) in the quotient space Q = X/SO(3). The tangent space decomposes as T_x X = V_x ⊕ H_x — QDM restricts all diffusion to the horizontal subspace H_x.
+</div>
+
+<img width="860" alt="Ambient-QDM-Modified" src="https://github.com/user-attachments/assets/7b272dde-e693-4d77-a0f2-8981244c0e14" />
+
+**Figure 2:** (a) Ambient diffusion injects noise in both intrinsic and symmetry-redundant directions, wasting model capacity. (b) QDM restricts noise strictly to horizontal directions H_x, removing symmetry redundancy at the SDE level and improving statistical efficiency.
 
 *Ambient diffusion injects noise in the full space including redundant symmetry-orbit directions. **QDM** restricts the stochastic process to horizontal, quotient-relevant directions — removing symmetry redundancy at the SDE level rather than only through network architecture.*
 
