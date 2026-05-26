@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "quotient-diffusion-models"
+version = "1.0.0"
+description = "Quotient Diffusion Models: Generative Learning on Symmetry-Reduced Manifolds"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Anonymous Authors"}
+]
+keywords = [
+    "diffusion models",
+    "symmetry reduction",
+    "quotient manifolds",
+    "equivariant generative models",
+    "molecular conformer generation",
+    "robot locomotion",
+    "Lie groups",
+    "score matching",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "black",
+    "isort",
+    "flake8",
+]
+molecular = [
+    "rdkit>=2022.09.1",
+    "ase>=3.22.0",
+]
+robot = [
+    # Isaac Gym must be installed separately from NVIDIA
+    # pip install isaacgym (from download at developer.nvidia.com)
+]
+all = [
+    "quotient-diffusion-models[dev,molecular]",
+]
+
+[project.urls]
+Homepage = "https://github.com/llmresearch678/Quotient-Manifold"
+Repository = "https://github.com/llmresearch678/Quotient-Manifold"
+Issues = "https://github.com/llmresearch678/Quotient-Manifold/issues"
+
+[tool.setuptools.packages.find]
+include = ["qdm*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+filterwarnings = ["ignore::DeprecationWarning"]

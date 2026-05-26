@@ -1,0 +1,80 @@
+# QDM-B Robot Locomotion — ANYmal-D, Five Terrain Types
+# Reproduces Table VI of the paper.
+
+model:
+  task: robot
+  variant: QDM-B          # ~9.1M parameters
+  n_atoms: 82             # Total state dimension d (joint pos/vel, orientation, etc.)
+  context_dim: 52         # Terrain embedding n_τ
+  n_modes: 16             # 2^4 contact configurations for stratification
+  eps_proj: 0.001
+  gamma_init: 2.1         # Learned end-to-end; QDM-B: γ=2.1, QDM-S: γ=1.3
+  beta_min: 0.1
+  beta_max: 20.0
+  n_steps: 50             # Fewer steps for real-time robot inference
+  method: em
+
+state:
+  # ANYmal-D state vector breakdown
+  joint_pos_dim: 12       # q ∈ R^12
+  joint_vel_dim: 12       # q̇ ∈ R^12
+  orientation_dim: 9      # R ∈ SO(3) (3×3 flattened)
+  angular_vel_dim: 3      # ω ∈ R^3
+  # Note: using quaternion (4D) + joint = 12+12+4+3 = 31 + 52 context = 83 ≈ 82
+
+context:
+  # Terrain context vector n_τ=52
+  height_grid: 16         # 4×4 local height map samples
+  height_stats: 4         # mean, variance, gradient magnitude/direction
+  surface_normal: 3       # surface normal vector
+  roughness: 1            # height std in 0.5m radius
+  curvature: 1            # Gaussian curvature
+  contact_geometry: 12    # contact normals (3 per foot × 4 feet)
+  contact_forces: 12      # estimated contact forces (3 per foot × 4 feet)
+  heading: 3              # world-frame heading direction
+
+symmetry:
+  group: SO2              # Heading rotation symmetry
+  group_dim: 1            # k = dim(SO(2)) = 1
+  ambient_dim: 82         # d = total state dimension
+  quotient_dim: 81        # d - k = 82 - 1 = 81
+  k_over_d: 0.0122        # Theoretical Fisher reduction fraction
+  contact_strata: 16      # Number of contact-configuration strata
+
+simulation:
+  engine: IsaacGym
+  quadruped: ANYmal-D
+  n_parallel_envs: 4096
+  terrains:
+    - flat
+    - rough_0.05          # σ_h = 0.05m
+    - stepping_stones     # 0.4m gap, 0.1m height
+    - slopes_15deg        # 15° inclined planes
+    - staircase_0.15m     # h_step=0.15m, d_step=0.30m
+
+training:
+  n_epochs: 500
+  batch_size: 128
+  lr: 3.0e-4
+  warmup_frac: 0.05
+  weight_decay: 0.01
+  grad_clip: 1.0
+  ema_decay: 0.999
+  use_amp: true
+  n_env_steps: 5.0e8
+
+hardware:
+  n_gpus: 4               # 4× H100 SXM 80GB (data-parallel DDP)
+  approx_time_days: 3
+
+evaluation:
+  n_episodes: 200         # Per terrain type per seed
+  n_seeds: 3
+  metrics: [SR, TS, EE, FSR, BS]
+  disturbance_forces: [50, 100, 150]  # Newton impulse forces
+
+logging:
+  log_every: 100
+  eval_every: 500
+  save_every: 2000
+  output_dir: outputs/robot_qdm_b

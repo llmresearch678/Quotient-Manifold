@@ -1,0 +1,49 @@
+# QDM-B Molecular Conformer Generation — GEOM-QM9
+# Reproduces Table I of the paper.
+
+model:
+  task: molecular
+  variant: QDM-B          # ~9.1M parameters
+  n_atoms: 9              # QM9 average heavy atoms
+  context_dim: 0          # No terrain context for molecules
+  n_modes: 1              # Single SO(3) quotient stratum
+  eps_proj: 0.001         # Gram matrix regularisation ε (robust: [1e-4, 1e-2])
+  gamma_init: 2.1         # Symmetry confidence decay γ (learned end-to-end)
+  beta_min: 0.1           # VP-SDE schedule
+  beta_max: 20.0
+  n_steps: 100            # Denoising steps at inference
+  method: em              # Euler-Maruyama (use 'heun' for 2nd-order ODE)
+
+dataset:
+  name: GEOM-QM9
+  threshold: 0.5          # COV threshold δ (Å)
+  split: geomol           # GeoMol standard splits for fair comparison
+  n_conformers: 5         # Generated conformers per molecule at evaluation
+
+training:
+  n_epochs: 250
+  batch_size: 128
+  lr: 3.0e-4              # Peak learning rate
+  lr_min: 1.0e-6          # Minimum LR (cosine schedule)
+  warmup_frac: 0.05       # 5% warm-up
+  weight_decay: 0.01      # AdamW weight decay
+  grad_clip: 1.0          # Global gradient norm clipping
+  ema_decay: 0.999        # EMA weight decay for evaluation
+  use_amp: true           # bfloat16 mixed precision
+  time_weight: true       # w(t) = 1/(1-t)²
+
+hardware:
+  n_gpus: 1
+  gpu_type: H100          # Single H100 SXM 80GB
+  approx_time_days: 2
+
+evaluation:
+  threshold: 0.5          # Å, COV-R/P threshold
+  metrics: [COV_R, AMR_R, COV_P, AMR_P]
+  n_seeds: 3              # Seeds: 42, 0, 7
+
+logging:
+  log_every: 100
+  eval_every: 1000
+  save_every: 5000
+  output_dir: outputs/qm9_qdm_b
